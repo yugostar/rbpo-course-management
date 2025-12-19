@@ -1,0 +1,26 @@
+name: build
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: eclipse-temurin:21-jdk-jammy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Make mvnw executable
+        run: chmod +x mvnw
+
+      - name: Build, test, package
+        run: ./mvnw -B clean package
+
+      - name: Upload jar artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-artifacts
+          path: ./target/*.jar
