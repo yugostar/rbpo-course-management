@@ -1,5 +1,5 @@
 -- Инициализация демо-данных
--- Пользователи
+-- ПользователиINSERT INTO USERS (id, username, password, role)
 INSERT INTO USERS (id, username, password, role)
 VALUES (1, 'teacher', '$2b$10$vY0lmwmSVM6f0UNU9B/btew3j9JK/RICRj0JWVZTcLWcQqOxmcj/C', 'TEACHER');
 INSERT INTO USERS (id, username, password, role)
