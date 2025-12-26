@@ -7,14 +7,39 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import java.io.StringReader;
 
 @RestController
 public class XmlController {
-    @PostMapping(value = "/api/xml/parse", consumes = {MediaType.TEXT_XML_VALUE, MediaType.APPLICATION_XML_VALUE})
+
+    @PostMapping(
+            value = "/api/xml/parse",
+            consumes = {MediaType.TEXT_XML_VALUE, MediaType.APPLICATION_XML_VALUE}
+    )
     public String parse(@RequestBody String xml) throws Exception {
+
         SAXReader reader = new SAXReader();
-        Document doc = reader.read(new StringReader(xml));
+
+        // A05: prevent XXE / entity expansion
+        reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        reader.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        reader.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        reader.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
+        // extra safety: block any external entity resolution
+        reader.setEntityResolver((publicId, systemId) -> new InputSource(new StringReader("")));
+
+        Document doc;
+        try {
+            doc = reader.read(new StringReader(xml));
+        } catch (SAXException e) {
+            // invalid XML / blocked DOCTYPE
+            throw new IllegalArgumentException("Invalid or unsafe XML");
+        }
+
         return doc.getRootElement().getText();
     }
 }
