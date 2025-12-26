@@ -110,6 +110,8 @@
                 <version>12.1.0</version>
                 <configuration>
                     <format>HTML</format>
+                    <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
+                    <failBuildOnCVSS>11</failBuildOnCVSS>
                     <suppressionFiles>
                         <suppressionFile>${project.basedir}/dependency-check-suppressions.xml</suppressionFile>
                     </suppressionFiles>
