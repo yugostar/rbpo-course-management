@@ -1,29 +1,41 @@
 spring:
   application:
     name: course-management
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-      settings:
-        web-allow-others: true
+
   datasource:
     url: jdbc:h2:mem:courseapp;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
+
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
     defer-datasource-initialization: true
+
+  h2:
+    console:
+      enabled: false
+      path: /h2-console
+      settings:
+        web-allow-others: false
+
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: "health,info"
+  endpoint:
+    health:
+      show-details: never
+
 server:
   error:
-    include-stacktrace: ALWAYS
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+
 app:
   plugin:
     url:
