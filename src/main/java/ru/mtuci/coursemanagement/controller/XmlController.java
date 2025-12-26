@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import java.io.StringReader;
 
@@ -32,14 +31,7 @@ public class XmlController {
         // extra safety: block any external entity resolution
         reader.setEntityResolver((publicId, systemId) -> new InputSource(new StringReader("")));
 
-        Document doc;
-        try {
-            doc = reader.read(new StringReader(xml));
-        } catch (SAXException e) {
-            // invalid XML / blocked DOCTYPE
-            throw new IllegalArgumentException("Invalid or unsafe XML");
-        }
-
+        Document doc = reader.read(new StringReader(xml));
         return doc.getRootElement().getText();
     }
 }
