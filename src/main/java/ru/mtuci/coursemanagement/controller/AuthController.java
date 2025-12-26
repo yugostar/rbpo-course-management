@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthController {
     private final UserService users;
+    private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/login")
     public String loginPage() {
@@ -33,8 +35,10 @@ public class AuthController {
         Optional<User> opt = users.findByUsername(username);
         if (opt.isPresent()) {
             User u = opt.get();
-            if (u.getPassword().equals(password)) {
-                log.info("User {} logged in with password {}", username, password);
+            if (passwordEncoder.matches(password, u.getPassword())) {
+                // Do NOT log passwords
+                log.info("User {} logged in", username);
+
                 HttpSession s = req.getSession(true);
                 s.setAttribute("username", username);
                 s.setAttribute("role", u.getRole());
@@ -56,7 +60,13 @@ public class AuthController {
     public String register(@RequestParam String username,
                            @RequestParam String password,
                            @RequestParam(required = false, defaultValue = "STUDENT") String role) {
-        users.save(new User(null, username, password, role));
+
+        if (username == null || username.isBlank() || password == null || password.length() < 8) {
+            return "redirect:/login";
+        }
+
+        String hash = passwordEncoder.encode(password);
+        users.save(new User(null, username, hash, role));
         return "redirect:/login";
     }
 }
