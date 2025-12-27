@@ -1,0 +1,41 @@
+name: build
+
+on:
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  secrets:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan for secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    runs-on: ubuntu-latest
+    needs: secrets
+    container:
+      image: eclipse-temurin:21-jdk-jammy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Make mvnw executable
+        run: chmod +x mvnw
+
+      - name: Build, test, package
+        run: ./mvnw -B clean package
+
+      - name: Upload jar artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-artifacts
+          path: ./target/*.jar
